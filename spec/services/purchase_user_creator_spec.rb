@@ -20,7 +20,7 @@ RSpec.describe 'PurchaseUserCreator', type: :model do
       let(:user_params) { { first_name: 'Gilbert', last_name: 'Strang', email: 'gilbert@email.com' } }
 
       it 'creates a new guest user with proper params' do
-        expect(PurchaseUserCreator.call({ user_params: user_params })).to have_attributes(user_params.merge(guest: true)) and eq(User.first)
+        expect(PurchaseUserCreator.call({ user_params: user_params })).to have_attributes(user_params.merge(guest: true)).and eq(User.first)
       end
     end
   end
