@@ -7,16 +7,11 @@ RSpec.describe 'PurchaseOrderCreator' do
     let(:address) { nil }
     let(:sale) { create(:sale, name: 'Sales free', unit_price_cents: 10) }
     let!(:cart_item) { create(:cart_item, cart: cart, sale: sale, quantity: 2) }
+    let!(:order) { PurchaseOrderCreator.call({ user: user, cart: cart, address: address }) }
 
-    it 'creates order' do
-      expect do
-        PurchaseOrderCreator.call({ user: user, cart: cart, address: address })
-      end.to change { Order.count }
-    end
-
-    it 'creates  a new order object with proper params' do
+    it 'creates a new order object with proper params' do
       expect(
-        PurchaseOrderCreator.call({ user: user, cart: cart, address: address })
+        order
       ).to have_attributes({
                              user: user,
                              first_name: user.first_name,
@@ -27,20 +22,18 @@ RSpec.describe 'PurchaseOrderCreator' do
                              state: nil,
                              country: nil,
                              zip: nil
-                           })
+                           }) and eq(Order.first)
     end
 
-    it 'creates order line items' do
-      expect do
-        PurchaseOrderCreator.call({ user: user, cart: cart, address: address })
-      end.to change { OrderLineItem.count }.by(2)
-    end
-
-    it 'creates  new order lines object with proper params' do
-      PurchaseOrderCreator.call({ user: user, cart: cart, address: address })
+    it 'creates new order lines object with proper params' do
       expect(
-        OrderLineItem.pluck(:unit_price_cents, :shipping_costs_cents, :taxes_cents, :paid_price_cents)
-      ).to eq([[10, 100, 0, 110], [10, 100, 0, 110]])
+        OrderLineItem.all
+      ).to match_array([
+                         have_attributes({ unit_price_cents: 10, shipping_costs_cents: 100, taxes_cents: 0,
+                                           paid_price_cents: 110 }),
+                         have_attributes({ unit_price_cents: 10, shipping_costs_cents: 100, taxes_cents: 0,
+                                           paid_price_cents: 110 })
+                       ]) and eq(order.items)
     end
   end
 end

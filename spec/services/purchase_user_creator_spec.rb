@@ -19,15 +19,8 @@ RSpec.describe 'PurchaseUserCreator', type: :model do
     context 'when cart does not have a user' do
       let(:user_params) { { first_name: 'Gilbert', last_name: 'Strang', email: 'gilbert@email.com' } }
 
-      it 'creates a guest user' do
-        expect do
-          PurchaseUserCreator.call({ user_params: user_params })
-        end.to change { User.count }
-        expect(User.first).to be_guest
-      end
-
-      it 'returns a new user object with proper params' do
-        expect(PurchaseUserCreator.call({ user_params: user_params })).to have_attributes(user_params.merge(guest: true))
+      it 'creates a new guest user with proper params' do
+        expect(PurchaseUserCreator.call({ user_params: user_params })).to have_attributes(user_params.merge(guest: true)) and eq(User.first)
       end
     end
   end
