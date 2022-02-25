@@ -1,4 +1,6 @@
 class PurchaseOrderCreator < ApplicationService
+  SHIPPING_COSTS = 100
+  
   def initialize(purchase_params)
     @address_params = purchase_params[:address] || {}
     @cart = purchase_params[:cart]
@@ -6,12 +8,6 @@ class PurchaseOrderCreator < ApplicationService
   end
 
   def call
-    create
-  end
-
-  private_class_method :new
-
-  def create
     order = Order.new(
       user: @user,
       first_name: @user.first_name,
@@ -23,24 +19,25 @@ class PurchaseOrderCreator < ApplicationService
       country: @address_params[:country],
       zip: @address_params[:zip]
     )
+    order.items = get_cart_items(order)
+    order.save
+    order
+  end
 
-    order.items = @cart.items.flat_map do |item|
+  private
+  
+  def get_cart_items(order)
+    @cart.items.flat_map do |item|
       item.quantity.times.map do
         OrderLineItem.new(
           order: order,
           sale: item.sale,
           unit_price_cents: item.sale.unit_price_cents,
-          shipping_costs_cents: shipping_costs,
-          paid_price_cents: item.sale.unit_price_cents + shipping_costs
+          shipping_costs_cents: SHIPPING_COSTS,
+          paid_price_cents: item.sale.unit_price_cents + SHIPPING_COSTS
         )
       end
-    end
-
-    order.save
-    order
+    end    
   end
 
-  def shipping_costs
-    100
-  end
 end

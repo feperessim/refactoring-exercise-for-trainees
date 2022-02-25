@@ -26,8 +26,8 @@ RSpec.describe 'PurchaseUserCreator', type: :model do
         expect(User.first).to be_guest
       end
 
-      it 'returns a new user object' do
-        expect(PurchaseUserCreator.call({ user_params: user_params })).to eq(User.first)
+      it 'returns a new user object with proper params' do
+        expect(PurchaseUserCreator.call({ user_params: user_params })).to have_attributes(user_params.merge(guest: true))
       end
     end
   end

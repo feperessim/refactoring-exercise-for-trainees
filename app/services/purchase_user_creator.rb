@@ -5,12 +5,7 @@ class PurchaseUserCreator < ApplicationService
   end
 
   def call
-    create
-  end
-
-  private_class_method :new
-
-  def create
     @cart_user || User.create(**(@user_params || {}).merge(guest: true))
   end
+
 end
